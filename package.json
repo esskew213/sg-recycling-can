@@ -1,0 +1,26 @@
+{
+  "name": "sg-recycling-can",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esskew213/sg-recycling-can.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/esskew213/sg-recycling-can/issues"
+  },
+  "homepage": "https://github.com/esskew213/sg-recycling-can#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.1.8"
+  },
+  "dependencies": {
+    "systemjs": "^6.12.6"
+  }
+}

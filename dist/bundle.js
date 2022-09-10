@@ -77,7 +77,7 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
 });
 System.register("drawable-objects/FallingObject", ["index", "drawable-objects/ObjectOnScreen", "drawable-objects/Paddle"], function (exports_3, context_3) {
     "use strict";
-    var _FallingObject_x, _FallingObject_y, _FallingObject_img, _FallingObject_velocity, _ExtraLife_lifeBonus, index_2, ObjectOnScreen_2, Paddle_1, FallingObject, ExtraLife;
+    var _FallingObject_x, _FallingObject_y, _FallingObject_img, _FallingObject_velocity, _FallingObject_itemName, _FallingObject_description, _ExtraLife_lifeBonus, index_2, ObjectOnScreen_2, Paddle_1, FallingObject, ExtraLife;
     var __moduleName = context_3 && context_3.id;
     return {
         setters: [
@@ -93,7 +93,7 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
         ],
         execute: function () {
             FallingObject = class FallingObject extends ObjectOnScreen_2.default {
-                constructor(x, y, velocity, imageName) {
+                constructor(x, y, velocity, imageName, itemName, description) {
                     super();
                     _FallingObject_x.set(this, void 0);
                     _FallingObject_y.set(this, void 0);
@@ -101,9 +101,13 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
                     this.hasCollided = false;
                     this.isOnScreen = true;
                     _FallingObject_velocity.set(this, void 0);
+                    _FallingObject_itemName.set(this, void 0);
+                    _FallingObject_description.set(this, void 0);
                     __classPrivateFieldSet(this, _FallingObject_x, x, "f");
                     __classPrivateFieldSet(this, _FallingObject_y, y, "f");
                     __classPrivateFieldSet(this, _FallingObject_velocity, velocity, "f");
+                    __classPrivateFieldSet(this, _FallingObject_itemName, itemName, "f");
+                    __classPrivateFieldSet(this, _FallingObject_description, description, "f");
                     __classPrivateFieldSet(this, _FallingObject_img, document.createElement('img'), "f");
                     __classPrivateFieldGet(this, _FallingObject_img, "f").src = `dist/images/${imageName}`;
                 }
@@ -142,12 +146,12 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
                 }
             };
             exports_3("default", FallingObject);
-            _FallingObject_x = new WeakMap(), _FallingObject_y = new WeakMap(), _FallingObject_img = new WeakMap(), _FallingObject_velocity = new WeakMap();
+            _FallingObject_x = new WeakMap(), _FallingObject_y = new WeakMap(), _FallingObject_img = new WeakMap(), _FallingObject_velocity = new WeakMap(), _FallingObject_itemName = new WeakMap(), _FallingObject_description = new WeakMap();
             FallingObject.IMAGE_EXTENSION = 'dist/images/';
             FallingObject.onScreen = [];
             ExtraLife = class ExtraLife extends FallingObject {
-                constructor(x, y, velocity, imageName) {
-                    super(x, y, velocity, imageName);
+                constructor(x, y) {
+                    super(x, y, ExtraLife.VELOCITY, ExtraLife.IMAGE_NAME, ExtraLife.ITEM_NAME, ExtraLife.ITEM_DESCRIPTION);
                     _ExtraLife_lifeBonus.set(this, 1);
                 }
                 collisionEffect(updatePlayerStats) {
@@ -158,6 +162,8 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
             _ExtraLife_lifeBonus = new WeakMap();
             ExtraLife.VELOCITY = 3;
             ExtraLife.IMAGE_NAME = 'life.png';
+            ExtraLife.ITEM_NAME = 'Bonus life';
+            ExtraLife.ITEM_DESCRIPTION = 'An extra life for you!';
         }
     };
 });
@@ -239,7 +245,7 @@ System.register("drawable-objects/Scorekeeper", ["drawable-objects/ObjectOnScree
 });
 System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], function (exports_6, context_6) {
     "use strict";
-    var _Recyclable_name, _Recyclable_description, _Recyclable_points, _NonRecyclable_name, _NonRecyclable_description, _NonRecyclable_lifePenalty, FallingObject_1, Recyclable, NonRecyclable, recyclableObjects, nonRecyclableObjects;
+    var _Recyclable_points, _NonRecyclable_lifePenalty, FallingObject_1, Recyclable, NonRecyclable, recyclableObjects, nonRecyclableObjects;
     var __moduleName = context_6 && context_6.id;
     return {
         setters: [
@@ -250,12 +256,8 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
         execute: function () {
             Recyclable = class Recyclable extends FallingObject_1.default {
                 constructor(x, y, velocity, imageName, itemName, description, points) {
-                    super(x, y, velocity, imageName);
-                    _Recyclable_name.set(this, void 0);
-                    _Recyclable_description.set(this, void 0);
+                    super(x, y, velocity, imageName, itemName, description);
                     _Recyclable_points.set(this, void 0);
-                    __classPrivateFieldSet(this, _Recyclable_name, itemName, "f");
-                    __classPrivateFieldSet(this, _Recyclable_description, description, "f");
                     __classPrivateFieldSet(this, _Recyclable_points, points, "f");
                 }
                 collisionEffect(updatePlayerStats) {
@@ -263,15 +265,11 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
                 }
             };
             exports_6("Recyclable", Recyclable);
-            _Recyclable_name = new WeakMap(), _Recyclable_description = new WeakMap(), _Recyclable_points = new WeakMap();
+            _Recyclable_points = new WeakMap();
             NonRecyclable = class NonRecyclable extends FallingObject_1.default {
                 constructor(x, y, velocity, imageName, itemName, description, lifePenalty) {
-                    super(x, y, velocity, imageName);
-                    _NonRecyclable_name.set(this, void 0);
-                    _NonRecyclable_description.set(this, void 0);
+                    super(x, y, velocity, imageName, itemName, description);
                     _NonRecyclable_lifePenalty.set(this, void 0);
-                    __classPrivateFieldSet(this, _NonRecyclable_name, itemName, "f");
-                    __classPrivateFieldSet(this, _NonRecyclable_description, description, "f");
                     __classPrivateFieldSet(this, _NonRecyclable_lifePenalty, lifePenalty, "f");
                 }
                 collisionEffect(updatePlayerStats) {
@@ -279,10 +277,10 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
                 }
             };
             exports_6("NonRecyclable", NonRecyclable);
-            _NonRecyclable_name = new WeakMap(), _NonRecyclable_description = new WeakMap(), _NonRecyclable_lifePenalty = new WeakMap();
+            _NonRecyclable_lifePenalty = new WeakMap();
             exports_6("recyclableObjects", recyclableObjects = {
                 recyclable001: {
-                    itemName: 'glass bottle',
+                    itemName: 'Glass bottle',
                     imageName: 'glassBottle.png',
                     description: 'Clean glass bottles can be recycled.',
                     points: 1,
@@ -291,9 +289,9 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
             });
             exports_6("nonRecyclableObjects", nonRecyclableObjects = {
                 nonrecyclable001: {
-                    itemName: 'crisps bag',
+                    itemName: 'Crisps bag',
                     imageName: 'crispsBag.png',
-                    description: 'Clean glass bottles can be recycled.',
+                    description: "Foil-lined bags can't be recycled!",
                     lifePenalty: -1,
                     velocity: 2,
                 },
@@ -355,9 +353,9 @@ System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen
         }
     };
 });
-System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Paddle", "drawable-objects/Background", "drawable-objects/Scorekeeper", "drawable-objects/Items", "drawable-objects/Lifekeeper"], function (exports_8, context_8) {
+System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Paddle", "drawable-objects/Background", "drawable-objects/Scorekeeper", "drawable-objects/Items", "drawable-objects/Lifekeeper", "Menu"], function (exports_8, context_8) {
     "use strict";
-    var _Engine_backgroundImg, FallingObject_2, Paddle_2, Background_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Engine, GameService, gameService;
+    var _Engine_backgroundImg, FallingObject_2, Paddle_2, Background_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
     var __moduleName = context_8 && context_8.id;
     return {
         setters: [
@@ -379,6 +377,9 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
             },
             function (Lifekeeper_1_1) {
                 Lifekeeper_1 = Lifekeeper_1_1;
+            },
+            function (Menu_1_1) {
+                Menu_1 = Menu_1_1;
             }
         ],
         execute: function () {
@@ -387,6 +388,7 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                     this.fallingObjects = [];
                     _Engine_backgroundImg.set(this, void 0);
                     this.itemsToDraw = [];
+                    this.avgTimeBetweenGenerations = 3;
                     const canvas = document.createElement('canvas');
                     canvas.width = GameService.WIDTH;
                     canvas.height = GameService.HEIGHT;
@@ -409,33 +411,44 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                     this.paddle = new Paddle_2.default();
                     this.scorekeeper = new Scorekeeper_1.default();
                     this.lifekeeper = new Lifekeeper_1.default();
-                    let interval = setInterval(() => this.refreshScreen(), 16.7);
+                    this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
                 }
-                generateFallingObject() {
-                    function pickRandomObject(dictionary) {
+                selectRandomObject() {
+                    function pickRandomObjectFromList(dictionary) {
                         const randomNumber = Math.floor(Math.random() * Object.keys(dictionary).length);
-                        console.log(randomNumber);
                         return Object.values(dictionary)[randomNumber];
                     }
-                    if (FallingObject_2.default.onScreen.length < Engine.MAX_FALLING_OBJECTS) {
-                        if (Math.random() < Engine.BONUS_LIFE_PROBABILITY) {
-                            const newFallingObject = new FallingObject_3.ExtraLife(Math.random() * GameService.WIDTH, 0, FallingObject_3.ExtraLife.VELOCITY, FallingObject_3.ExtraLife.IMAGE_NAME);
-                            this.itemsToDraw.push(newFallingObject);
-                            FallingObject_2.default.onScreen.push(newFallingObject);
-                        }
-                        else if (Math.random() <
-                            Engine.BONUS_LIFE_PROBABILITY + Engine.OBJECT_PROBABILITY) {
-                            let newFallingObject;
-                            if (Math.random() < Engine.RECYCLABLE_PROBABILITY) {
-                                const { itemName, imageName, description, points, velocity } = pickRandomObject(Items_1.recyclableObjects);
-                                newFallingObject = new Items_1.Recyclable(Math.random() * GameService.WIDTH, 0, velocity, imageName, itemName, description, points);
-                            }
-                            else {
-                                const { itemName, imageName, description, lifePenalty, velocity } = pickRandomObject(Items_1.nonRecyclableObjects);
-                                newFallingObject = new Items_1.NonRecyclable(Math.random() * GameService.WIDTH, 0, velocity, imageName, itemName, description, lifePenalty);
-                            }
-                            this.itemsToDraw.push(newFallingObject);
-                            FallingObject_2.default.onScreen.push(newFallingObject);
+                    const randomNumber = Math.random();
+                    if (randomNumber < Engine.BONUS_LIFE_PROBABILITY_CUTOFF) {
+                        return new FallingObject_3.ExtraLife(Math.random() * GameService.WIDTH, 0);
+                    }
+                    else if (randomNumber < Engine.RECYCLABLE_PROBABILITY_CUTOFF) {
+                        const { itemName, imageName, description, points, velocity } = pickRandomObjectFromList(Items_1.recyclableObjects);
+                        return new Items_1.Recyclable(Math.random() * GameService.WIDTH, 0, velocity, imageName, itemName, description, points);
+                    }
+                    else {
+                        const { itemName, imageName, description, lifePenalty, velocity } = pickRandomObjectFromList(Items_1.nonRecyclableObjects);
+                        return new Items_1.NonRecyclable(Math.random() * GameService.WIDTH, 0, velocity, imageName, itemName, description, lifePenalty);
+                    }
+                }
+                generateFallingObject() {
+                    if (this.timeItemLastGenerated === undefined) {
+                        this.timeItemLastGenerated = Date.now();
+                        console.log(this.timeItemLastGenerated);
+                        const randomObject = this.selectRandomObject();
+                        this.itemsToDraw.push(randomObject);
+                        FallingObject_2.default.onScreen.push(randomObject);
+                    }
+                    else {
+                        const currentTime = Date.now();
+                        const timeDifferenceInSeconds = (currentTime - this.timeItemLastGenerated) / 1000;
+                        const randomJitter = Math.random() * (Math.random() > 0.5 ? 1 : -1);
+                        if (timeDifferenceInSeconds >
+                            this.avgTimeBetweenGenerations + randomJitter) {
+                            const randomObject = this.selectRandomObject();
+                            this.itemsToDraw.push(randomObject);
+                            FallingObject_2.default.onScreen.push(randomObject);
+                            this.timeItemLastGenerated = currentTime;
                         }
                     }
                 }
@@ -467,22 +480,32 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                         }
                     }
                 }
+                pauseAndResume(action) {
+                    if (action === 'pause') {
+                        clearInterval(this.interval);
+                        // this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
+                    }
+                    else if (action === 'resume') {
+                        this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+                    }
+                }
             };
             _Engine_backgroundImg = new WeakMap();
-            Engine.MAX_FALLING_OBJECTS = 8;
-            Engine.BONUS_LIFE_PROBABILITY = 0.01;
-            Engine.OBJECT_PROBABILITY = 0.04;
-            Engine.RECYCLABLE_PROBABILITY = 0.5;
+            Engine.BONUS_LIFE_PROBABILITY_CUTOFF = 0.04;
+            Engine.RECYCLABLE_PROBABILITY_CUTOFF = 0.52;
+            Engine.NONRECYCLABLE_PROBABILITY_CUTOFF = 1;
             GameService = class GameService {
                 constructor() {
                     this.gameState = 'notStarted';
                     const gameContainer = document.querySelector('.game-container');
                     this.engine = new Engine(gameContainer);
+                    this.menu = new Menu_1.default(gameContainer);
                     window.addEventListener('keydown', (e) => this.listenToKeypress(e));
                 }
                 listenToKeypress(e) {
                     if (e.key === 'Enter' && this.gameState === 'notStarted') {
                         this.gameState = 'started';
+                        this.menu.receiveKeypress();
                         this.engine.startGame();
                     }
                     else if (e.key === 'ArrowRight' && this.gameState === 'started') {
@@ -491,6 +514,20 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                     else if (e.key === 'ArrowLeft' && this.gameState === 'started') {
                         this.engine.receiveArrowKey('left');
                     }
+                    else if ((e.key === 'p' || e.key === 'P') &&
+                        this.gameState === 'started') {
+                        console.log(e.key);
+                        this.gameState = 'paused';
+                        this.menu.receiveKeypress();
+                        this.engine.pauseAndResume('pause');
+                    }
+                    else if ((e.key === 'p' || e.key === 'P') &&
+                        this.gameState === 'paused') {
+                        console.log(e.key);
+                        this.gameState = 'started';
+                        this.menu.receiveKeypress();
+                        this.engine.pauseAndResume('resume');
+                    }
                 }
             };
             exports_8("default", GameService);
@@ -498,6 +535,60 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
             GameService.HEIGHT = 600;
             GameService.BACKGROUND_COLOUR = 'cornflowerblue';
             gameService = new GameService();
+        }
+    };
+});
+System.register("Menu", ["index", "drawable-objects/Items"], function (exports_9, context_9) {
+    "use strict";
+    var index_4, Items_2, Menu;
+    var __moduleName = context_9 && context_9.id;
+    return {
+        setters: [
+            function (index_4_1) {
+                index_4 = index_4_1;
+            },
+            function (Items_2_1) {
+                Items_2 = Items_2_1;
+            }
+        ],
+        execute: function () {
+            Menu = class Menu {
+                constructor(element) {
+                    this.menu = document.createElement('div');
+                    this.menu.setAttribute('width', index_4.default.WIDTH.toString());
+                    this.menu.setAttribute('height', index_4.default.HEIGHT.toString());
+                    this.menu.classList.add('menu');
+                    this.menu.innerHTML =
+                        'PRESS ENTER TO START GAME<br />PRESS P TO PAUSE AND UNPAUSE<br />PRESS Q TO QUIT<br />';
+                    const recyclableItems = Object.values(Items_2.recyclableObjects).map((item) => {
+                        return {
+                            itemName: item.itemName,
+                            imageName: item.imageName,
+                            description: item.description,
+                        };
+                    });
+                    const nonRecyclableItems = Object.values(Items_2.nonRecyclableObjects).map((item) => {
+                        return {
+                            itemName: item.itemName,
+                            imageName: item.imageName,
+                            description: item.description,
+                        };
+                    });
+                    this.allItems = recyclableItems.concat(nonRecyclableItems);
+                    const listOfItems = document.createElement('ul');
+                    this.allItems.forEach((item) => {
+                        const li = document.createElement('li');
+                        li.textContent = `${item.itemName}: ${item.description}`;
+                        listOfItems.appendChild(li);
+                    });
+                    this.menu.appendChild(listOfItems);
+                    element.appendChild(this.menu);
+                }
+                receiveKeypress() {
+                    this.menu.classList.toggle('menu--hidden');
+                }
+            };
+            exports_9("default", Menu);
         }
     };
 });

@@ -21,8 +21,6 @@ export interface DictionaryOfObjects<T> {
 }
 
 export class Recyclable extends FallingObject {
-  #name: string;
-  #description: string;
   #points: number;
   constructor(
     x: number,
@@ -33,9 +31,7 @@ export class Recyclable extends FallingObject {
     description: string,
     points: number
   ) {
-    super(x, y, velocity, imageName);
-    this.#name = itemName;
-    this.#description = description;
+    super(x, y, velocity, imageName, itemName, description);
     this.#points = points;
   }
   collisionEffect(updatePlayerStats: Function): void {
@@ -44,8 +40,6 @@ export class Recyclable extends FallingObject {
 }
 
 export class NonRecyclable extends FallingObject {
-  #name: string;
-  #description: string;
   #lifePenalty: number;
   constructor(
     x: number,
@@ -56,9 +50,7 @@ export class NonRecyclable extends FallingObject {
     description: string,
     lifePenalty: number
   ) {
-    super(x, y, velocity, imageName);
-    this.#name = itemName;
-    this.#description = description;
+    super(x, y, velocity, imageName, itemName, description);
     this.#lifePenalty = lifePenalty;
   }
   collisionEffect(updatePlayerStats: Function): void {
@@ -68,19 +60,20 @@ export class NonRecyclable extends FallingObject {
 
 export const recyclableObjects: DictionaryOfObjects<RecyclableDescription> = {
   recyclable001: {
-    itemName: 'glass bottle',
+    itemName: 'Glass bottle',
     imageName: 'glassBottle.png',
     description: 'Clean glass bottles can be recycled.',
     points: 1,
     velocity: 2,
   },
 };
+
 export const nonRecyclableObjects: DictionaryOfObjects<NonRecyclableDescription> =
   {
     nonrecyclable001: {
-      itemName: 'crisps bag',
+      itemName: 'Crisps bag',
       imageName: 'crispsBag.png',
-      description: 'Clean glass bottles can be recycled.',
+      description: "Foil-lined bags can't be recycled!",
       lifePenalty: -1,
       velocity: 2,
     },

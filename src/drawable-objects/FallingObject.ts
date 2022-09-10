@@ -11,12 +11,23 @@ export default abstract class FallingObject extends ObjectOnScreen {
   hasCollided: boolean = false;
   isOnScreen: boolean = true;
   #velocity: number;
+  #itemName: string;
+  #description: string;
 
-  constructor(x: number, y: number, velocity: number, imageName: string) {
+  constructor(
+    x: number,
+    y: number,
+    velocity: number,
+    imageName: string,
+    itemName: string,
+    description: string
+  ) {
     super();
     this.#x = x;
     this.#y = y;
     this.#velocity = velocity;
+    this.#itemName = itemName;
+    this.#description = description;
     this.#img = document.createElement('img');
     this.#img.src = `dist/images/${imageName}`;
   }
@@ -60,9 +71,18 @@ export default abstract class FallingObject extends ObjectOnScreen {
 export class ExtraLife extends FallingObject {
   static VELOCITY = 3;
   static IMAGE_NAME = 'life.png';
+  static ITEM_NAME = 'Bonus life';
+  static ITEM_DESCRIPTION = 'An extra life for you!';
   #lifeBonus = 1;
-  constructor(x: number, y: number, velocity: number, imageName: string) {
-    super(x, y, velocity, imageName);
+  constructor(x: number, y: number) {
+    super(
+      x,
+      y,
+      ExtraLife.VELOCITY,
+      ExtraLife.IMAGE_NAME,
+      ExtraLife.ITEM_NAME,
+      ExtraLife.ITEM_DESCRIPTION
+    );
   }
   collisionEffect(updatePlayerStats: Function): void {
     updatePlayerStats('lives', this.#lifeBonus);

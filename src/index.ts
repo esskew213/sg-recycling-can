@@ -1,7 +1,7 @@
 import ObjectOnScreen from './drawable-objects/ObjectOnScreen';
 import FallingObject from './drawable-objects/FallingObject';
-import Paddle from './drawable-objects/Paddle';
 import Background from './drawable-objects/Background';
+import Paddle from './drawable-objects/Paddle';
 import Scorekeeper from './drawable-objects/Scorekeeper';
 import {
   DictionaryOfObjects,
@@ -40,6 +40,7 @@ class Engine {
   refreshScreen(): void {
     this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
+    console.log(this.itemsToDraw);
     FallingObject.onScreen.forEach((item) => {
       const boundUpdateStats = this.updateStats.bind(this);
       item.update(
@@ -51,7 +52,6 @@ class Engine {
     });
     this.generateFallingObject();
     this.deleteOffscreenObjects();
-    console.log(this.scorekeeper!.score);
   }
 
   startGame(): void {
@@ -195,7 +195,6 @@ export default class GameService {
       (e.key === 'p' || e.key === 'P') &&
       this.gameState === 'started'
     ) {
-      console.log(e.key);
       this.gameState = 'paused';
       this.menu.receiveKeypress();
       this.engine.pauseAndResume('pause');
@@ -203,7 +202,6 @@ export default class GameService {
       (e.key === 'p' || e.key === 'P') &&
       this.gameState === 'paused'
     ) {
-      console.log(e.key);
       this.gameState = 'started';
       this.menu.receiveKeypress();
       this.engine.pauseAndResume('resume');

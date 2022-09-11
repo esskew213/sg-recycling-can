@@ -8,6 +8,7 @@ export default class Background extends ObjectOnScreen {
     super();
     this.#img = document.createElement('img');
     this.#img.src = 'dist/images/background.png';
+    console.log('background drawn');
   }
   get x(): number {
     return this.#x;

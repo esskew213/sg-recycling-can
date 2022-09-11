@@ -44,9 +44,13 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
                     _Paddle_img.set(this, void 0);
                     __classPrivateFieldSet(this, _Paddle_img, document.createElement('img'), "f");
                     __classPrivateFieldGet(this, _Paddle_img, "f").src = 'dist/images/blueBin.png';
+                    console.log('paddle drawn');
+                    __classPrivateFieldSet(this, _Paddle_x, 0, "f");
                     __classPrivateFieldSet(this, _Paddle_y, 0, "f");
-                    __classPrivateFieldSet(this, _Paddle_x, (index_1.default.WIDTH - __classPrivateFieldGet(this, _Paddle_img, "f").width) / 2, "f");
-                    __classPrivateFieldSet(this, _Paddle_y, index_1.default.HEIGHT - __classPrivateFieldGet(this, _Paddle_img, "f").height, "f");
+                    __classPrivateFieldGet(this, _Paddle_img, "f").onload = () => {
+                        __classPrivateFieldSet(this, _Paddle_x, (index_1.default.WIDTH - __classPrivateFieldGet(this, _Paddle_img, "f").width) / 2, "f");
+                        __classPrivateFieldSet(this, _Paddle_y, index_1.default.HEIGHT - __classPrivateFieldGet(this, _Paddle_img, "f").height, "f");
+                    };
                 }
                 get x() {
                     return __classPrivateFieldGet(this, _Paddle_x, "f");
@@ -61,7 +65,6 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
                     return __classPrivateFieldGet(this, _Paddle_img, "f").height;
                 }
                 draw(ctx) {
-                    console.log(__classPrivateFieldGet(this, _Paddle_x, "f"));
                     ctx.drawImage(__classPrivateFieldGet(this, _Paddle_img, "f"), __classPrivateFieldGet(this, _Paddle_x, "f"), __classPrivateFieldGet(this, _Paddle_y, "f"));
                 }
                 move(direction) {
@@ -187,6 +190,7 @@ System.register("drawable-objects/Background", ["drawable-objects/ObjectOnScreen
                     _Background_img.set(this, void 0);
                     __classPrivateFieldSet(this, _Background_img, document.createElement('img'), "f");
                     __classPrivateFieldGet(this, _Background_img, "f").src = 'dist/images/background.png';
+                    console.log('background drawn');
                 }
                 get x() {
                     return __classPrivateFieldGet(this, _Background_x, "f");
@@ -334,11 +338,9 @@ System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen
                     return __classPrivateFieldGet(this, _Lifekeeper_y, "f");
                 }
                 addLives(lifeBonus) {
-                    console.log('lifebonus', __classPrivateFieldGet(this, _Lifekeeper_lives, "f"));
                     const newNumberOfLives = __classPrivateFieldGet(this, _Lifekeeper_lives, "f") + lifeBonus;
                     __classPrivateFieldSet(this, _Lifekeeper_lives, Math.min(Lifekeeper.MAX_LIVES, newNumberOfLives), "f");
                     if (newNumberOfLives === 0) {
-                        console.log('game over');
                         document.location.reload();
                     }
                 }
@@ -354,9 +356,9 @@ System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen
         }
     };
 });
-System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Paddle", "drawable-objects/Background", "drawable-objects/Scorekeeper", "drawable-objects/Items", "drawable-objects/Lifekeeper", "Menu"], function (exports_8, context_8) {
+System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Background", "drawable-objects/Paddle", "drawable-objects/Scorekeeper", "drawable-objects/Items", "drawable-objects/Lifekeeper", "Menu"], function (exports_8, context_8) {
     "use strict";
-    var _Engine_backgroundImg, FallingObject_2, Paddle_1, Background_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
+    var _Engine_backgroundImg, FallingObject_2, Background_1, Paddle_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
     var __moduleName = context_8 && context_8.id;
     return {
         setters: [
@@ -364,11 +366,11 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                 FallingObject_2 = FallingObject_2_1;
                 FallingObject_3 = FallingObject_2_1;
             },
-            function (Paddle_1_1) {
-                Paddle_1 = Paddle_1_1;
-            },
             function (Background_1_1) {
                 Background_1 = Background_1_1;
+            },
+            function (Paddle_1_1) {
+                Paddle_1 = Paddle_1_1;
             },
             function (Scorekeeper_1_1) {
                 Scorekeeper_1 = Scorekeeper_1_1;
@@ -399,13 +401,13 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                 refreshScreen() {
                     this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
                     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
+                    console.log(this.itemsToDraw);
                     FallingObject_2.default.onScreen.forEach((item) => {
                         const boundUpdateStats = this.updateStats.bind(this);
                         item.update(this.paddle.x, this.paddle.width, this.paddle.height, boundUpdateStats);
                     });
                     this.generateFallingObject();
                     this.deleteOffscreenObjects();
-                    console.log(this.scorekeeper.score);
                 }
                 startGame() {
                     __classPrivateFieldSet(this, _Engine_backgroundImg, new Background_1.default(), "f");
@@ -517,14 +519,12 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                     }
                     else if ((e.key === 'p' || e.key === 'P') &&
                         this.gameState === 'started') {
-                        console.log(e.key);
                         this.gameState = 'paused';
                         this.menu.receiveKeypress();
                         this.engine.pauseAndResume('pause');
                     }
                     else if ((e.key === 'p' || e.key === 'P') &&
                         this.gameState === 'paused') {
-                        console.log(e.key);
                         this.gameState = 'started';
                         this.menu.receiveKeypress();
                         this.engine.pauseAndResume('resume');

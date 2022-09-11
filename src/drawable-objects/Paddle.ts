@@ -20,6 +20,10 @@ export default class Paddle extends ObjectOnScreen {
       this.#x = (GameService.WIDTH - this.#img.width) / 2;
       this.#y = GameService.HEIGHT - this.#img.height;
     };
+
+    this.#img.onerror = (e) => {
+      throw new Error(`${e}`);
+    };
   }
   get x(): number {
     return this.#x;

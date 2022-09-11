@@ -51,6 +51,9 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
                         __classPrivateFieldSet(this, _Paddle_x, (index_1.default.WIDTH - __classPrivateFieldGet(this, _Paddle_img, "f").width) / 2, "f");
                         __classPrivateFieldSet(this, _Paddle_y, index_1.default.HEIGHT - __classPrivateFieldGet(this, _Paddle_img, "f").height, "f");
                     };
+                    __classPrivateFieldGet(this, _Paddle_img, "f").onerror = (e) => {
+                        throw new Error(`${e}`);
+                    };
                 }
                 get x() {
                     return __classPrivateFieldGet(this, _Paddle_x, "f");

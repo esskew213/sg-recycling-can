@@ -24,7 +24,7 @@ System.register("drawable-objects/ObjectOnScreen", [], function (exports_1, cont
 });
 System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "index"], function (exports_2, context_2) {
     "use strict";
-    var _Paddle_x, _Paddle_y, ObjectOnScreen_1, index_1, Paddle;
+    var _Paddle_x, _Paddle_y, _Paddle_img, ObjectOnScreen_1, index_1, Paddle;
     var __moduleName = context_2 && context_2.id;
     return {
         setters: [
@@ -41,8 +41,12 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
                     super();
                     _Paddle_x.set(this, void 0);
                     _Paddle_y.set(this, void 0);
-                    __classPrivateFieldSet(this, _Paddle_x, (index_1.default.WIDTH - Paddle.WIDTH) / 2, "f");
-                    __classPrivateFieldSet(this, _Paddle_y, index_1.default.HEIGHT - Paddle.HEIGHT, "f");
+                    _Paddle_img.set(this, void 0);
+                    __classPrivateFieldSet(this, _Paddle_img, document.createElement('img'), "f");
+                    __classPrivateFieldGet(this, _Paddle_img, "f").src = 'dist/images/blueBin.png';
+                    __classPrivateFieldSet(this, _Paddle_y, 0, "f");
+                    __classPrivateFieldSet(this, _Paddle_x, (index_1.default.WIDTH - __classPrivateFieldGet(this, _Paddle_img, "f").width) / 2, "f");
+                    __classPrivateFieldSet(this, _Paddle_y, index_1.default.HEIGHT - __classPrivateFieldGet(this, _Paddle_img, "f").height, "f");
                 }
                 get x() {
                     return __classPrivateFieldGet(this, _Paddle_x, "f");
@@ -50,12 +54,15 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
                 get y() {
                     return __classPrivateFieldGet(this, _Paddle_y, "f");
                 }
+                get width() {
+                    return __classPrivateFieldGet(this, _Paddle_img, "f").width;
+                }
+                get height() {
+                    return __classPrivateFieldGet(this, _Paddle_img, "f").height;
+                }
                 draw(ctx) {
-                    ctx.beginPath();
-                    ctx.rect(__classPrivateFieldGet(this, _Paddle_x, "f"), __classPrivateFieldGet(this, _Paddle_y, "f"), Paddle.WIDTH, Paddle.HEIGHT);
-                    ctx.fillStyle = Paddle.COLOUR;
-                    ctx.fill();
-                    ctx.closePath();
+                    console.log(__classPrivateFieldGet(this, _Paddle_x, "f"));
+                    ctx.drawImage(__classPrivateFieldGet(this, _Paddle_img, "f"), __classPrivateFieldGet(this, _Paddle_x, "f"), __classPrivateFieldGet(this, _Paddle_y, "f"));
                 }
                 move(direction) {
                     if (direction === 'left') {
@@ -67,17 +74,14 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
                 }
             };
             exports_2("default", Paddle);
-            _Paddle_x = new WeakMap(), _Paddle_y = new WeakMap();
-            Paddle.COLOUR = 'blue';
-            Paddle.WIDTH = 80;
-            Paddle.HEIGHT = 20;
+            _Paddle_x = new WeakMap(), _Paddle_y = new WeakMap(), _Paddle_img = new WeakMap();
             Paddle.SPEED = 10;
         }
     };
 });
-System.register("drawable-objects/FallingObject", ["index", "drawable-objects/ObjectOnScreen", "drawable-objects/Paddle"], function (exports_3, context_3) {
+System.register("drawable-objects/FallingObject", ["index", "drawable-objects/ObjectOnScreen"], function (exports_3, context_3) {
     "use strict";
-    var _FallingObject_x, _FallingObject_y, _FallingObject_img, _FallingObject_velocity, _FallingObject_itemName, _FallingObject_description, _ExtraLife_lifeBonus, index_2, ObjectOnScreen_2, Paddle_1, FallingObject, ExtraLife;
+    var _FallingObject_x, _FallingObject_y, _FallingObject_img, _FallingObject_velocity, _FallingObject_itemName, _FallingObject_description, _ExtraLife_lifeBonus, index_2, ObjectOnScreen_2, FallingObject, ExtraLife;
     var __moduleName = context_3 && context_3.id;
     return {
         setters: [
@@ -86,9 +90,6 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
             },
             function (ObjectOnScreen_2_1) {
                 ObjectOnScreen_2 = ObjectOnScreen_2_1;
-            },
-            function (Paddle_1_1) {
-                Paddle_1 = Paddle_1_1;
             }
         ],
         execute: function () {
@@ -128,17 +129,17 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
                         this.isOnScreen = false;
                     }
                 }
-                updateCollisionState(startX) {
+                updateCollisionState(startX, paddleWidth, paddleHeight) {
                     this.hasCollided =
                         __classPrivateFieldGet(this, _FallingObject_x, "f") + __classPrivateFieldGet(this, _FallingObject_img, "f").width > startX &&
-                            __classPrivateFieldGet(this, _FallingObject_x, "f") < startX + Paddle_1.default.WIDTH &&
-                            __classPrivateFieldGet(this, _FallingObject_y, "f") + __classPrivateFieldGet(this, _FallingObject_img, "f").height > index_2.default.HEIGHT - Paddle_1.default.HEIGHT &&
+                            __classPrivateFieldGet(this, _FallingObject_x, "f") < startX + paddleWidth &&
+                            __classPrivateFieldGet(this, _FallingObject_y, "f") + __classPrivateFieldGet(this, _FallingObject_img, "f").height > index_2.default.HEIGHT - paddleHeight &&
                             __classPrivateFieldGet(this, _FallingObject_y, "f") < index_2.default.HEIGHT;
                     this.isOnScreen = !this.hasCollided;
                 }
-                update(startX, updatePlayerStats) {
+                update(startX, paddleWidth, paddleHeight, updatePlayerStats) {
                     this.move();
-                    this.updateCollisionState(startX);
+                    this.updateCollisionState(startX, paddleWidth, paddleHeight);
                     this.updateOnscreenState();
                     if (this.hasCollided) {
                         this.collisionEffect(updatePlayerStats);
@@ -355,7 +356,7 @@ System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen
 });
 System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Paddle", "drawable-objects/Background", "drawable-objects/Scorekeeper", "drawable-objects/Items", "drawable-objects/Lifekeeper", "Menu"], function (exports_8, context_8) {
     "use strict";
-    var _Engine_backgroundImg, FallingObject_2, Paddle_2, Background_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
+    var _Engine_backgroundImg, FallingObject_2, Paddle_1, Background_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
     var __moduleName = context_8 && context_8.id;
     return {
         setters: [
@@ -363,8 +364,8 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                 FallingObject_2 = FallingObject_2_1;
                 FallingObject_3 = FallingObject_2_1;
             },
-            function (Paddle_2_1) {
-                Paddle_2 = Paddle_2_1;
+            function (Paddle_1_1) {
+                Paddle_1 = Paddle_1_1;
             },
             function (Background_1_1) {
                 Background_1 = Background_1_1;
@@ -400,7 +401,7 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
                     FallingObject_2.default.onScreen.forEach((item) => {
                         const boundUpdateStats = this.updateStats.bind(this);
-                        item.update(this.paddle.x, boundUpdateStats);
+                        item.update(this.paddle.x, this.paddle.width, this.paddle.height, boundUpdateStats);
                     });
                     this.generateFallingObject();
                     this.deleteOffscreenObjects();
@@ -408,7 +409,7 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Pa
                 }
                 startGame() {
                     __classPrivateFieldSet(this, _Engine_backgroundImg, new Background_1.default(), "f");
-                    this.paddle = new Paddle_2.default();
+                    this.paddle = new Paddle_1.default();
                     this.scorekeeper = new Scorekeeper_1.default();
                     this.lifekeeper = new Lifekeeper_1.default();
                     this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);

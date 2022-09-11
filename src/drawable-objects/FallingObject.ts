@@ -49,17 +49,26 @@ export default abstract class FallingObject extends ObjectOnScreen {
       this.isOnScreen = false;
     }
   }
-  protected updateCollisionState(startX: number): void {
+  protected updateCollisionState(
+    startX: number,
+    paddleWidth: number,
+    paddleHeight: number
+  ): void {
     this.hasCollided =
       this.#x + this.#img.width > startX &&
-      this.#x < startX + Paddle.WIDTH &&
-      this.#y + this.#img.height > GameService.HEIGHT - Paddle.HEIGHT &&
+      this.#x < startX + paddleWidth &&
+      this.#y + this.#img.height > GameService.HEIGHT - paddleHeight &&
       this.#y < GameService.HEIGHT;
     this.isOnScreen = !this.hasCollided;
   }
-  public update(startX: number, updatePlayerStats: Function): void {
+  public update(
+    startX: number,
+    paddleWidth: number,
+    paddleHeight: number,
+    updatePlayerStats: Function
+  ): void {
     this.move();
-    this.updateCollisionState(startX);
+    this.updateCollisionState(startX, paddleWidth, paddleHeight);
     this.updateOnscreenState();
     if (this.hasCollided) {
       this.collisionEffect(updatePlayerStats);

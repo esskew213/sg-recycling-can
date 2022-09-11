@@ -2,16 +2,19 @@ import ObjectOnScreen from './ObjectOnScreen';
 import GameService from '../index';
 
 export default class Paddle extends ObjectOnScreen {
-  static COLOUR: string = 'blue';
-  static WIDTH: number = 80;
-  static HEIGHT: number = 20;
   static SPEED: number = 10;
+
   #x: number;
   #y: number;
+  #img: HTMLImageElement;
   constructor() {
     super();
-    this.#x = (GameService.WIDTH - Paddle.WIDTH) / 2;
-    this.#y = GameService.HEIGHT - Paddle.HEIGHT;
+    this.#img = document.createElement('img');
+    this.#img.src = 'dist/images/blueBin.png';
+
+    this.#y = 0;
+    this.#x = (GameService.WIDTH - this.#img.width) / 2;
+    this.#y = GameService.HEIGHT - this.#img.height;
   }
   get x(): number {
     return this.#x;
@@ -19,12 +22,15 @@ export default class Paddle extends ObjectOnScreen {
   get y(): number {
     return this.#y;
   }
+  get width(): number {
+    return this.#img.width;
+  }
+  get height(): number {
+    return this.#img.height;
+  }
   draw(ctx: CanvasRenderingContext2D): void {
-    ctx.beginPath();
-    ctx.rect(this.#x, this.#y, Paddle.WIDTH, Paddle.HEIGHT);
-    ctx.fillStyle = Paddle.COLOUR;
-    ctx.fill();
-    ctx.closePath();
+    console.log(this.#x);
+    ctx.drawImage(this.#img, this.#x, this.#y);
   }
   public move(direction: 'left' | 'right' | undefined): void {
     if (direction === 'left') {

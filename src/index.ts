@@ -42,7 +42,12 @@ class Engine {
     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
     FallingObject.onScreen.forEach((item) => {
       const boundUpdateStats = this.updateStats.bind(this);
-      item.update(this.paddle!.x, boundUpdateStats);
+      item.update(
+        this.paddle!.x,
+        this.paddle!.width,
+        this.paddle!.height,
+        boundUpdateStats
+      );
     });
     this.generateFallingObject();
     this.deleteOffscreenObjects();

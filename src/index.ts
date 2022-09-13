@@ -17,6 +17,11 @@ class Engine {
   static BONUS_LIFE_PROBABILITY_CUTOFF: number = 0.04;
   static RECYCLABLE_PROBABILITY_CUTOFF: number = 0.52;
   static NONRECYCLABLE_PROBABILITY_CUTOFF: number = 1;
+  static SCORE_TO_MULTIPLIER_MAP: { [key: string]: number } = {
+    '2': 1.5,
+    '3': 2,
+    '5': 3,
+  };
 
   fallingObjects: FallingObject[] = [];
   paddle?: Paddle;
@@ -28,6 +33,8 @@ class Engine {
   interval?: number;
   timeItemLastGenerated?: number;
   avgTimeBetweenGenerations: number = 3;
+  maxObjectsOnScreen: number = 5;
+  velocityMultiplier: number = 1;
 
   constructor(element: Element) {
     const canvas = document.createElement('canvas');
@@ -40,7 +47,6 @@ class Engine {
   refreshScreen(): void {
     this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
-    console.log(this.itemsToDraw);
     FallingObject.onScreen.forEach((item) => {
       const boundUpdateStats = this.updateStats.bind(this);
       item.update(
@@ -49,6 +55,7 @@ class Engine {
         this.paddle!.height,
         boundUpdateStats
       );
+      console.log(item.velocity);
     });
     this.generateFallingObject();
     this.deleteOffscreenObjects();
@@ -74,13 +81,18 @@ class Engine {
 
     const randomNumber = Math.random();
     if (randomNumber < Engine.BONUS_LIFE_PROBABILITY_CUTOFF) {
-      return new ExtraLife(Math.random() * GameService.WIDTH, 0);
+      return new ExtraLife(
+        Math.random() * GameService.WIDTH,
+        0,
+        this.velocityMultiplier
+      );
     } else if (randomNumber < Engine.RECYCLABLE_PROBABILITY_CUTOFF) {
       const { itemName, imageName, description, points, velocity } =
         pickRandomObjectFromList(recyclableObjects);
       return new Recyclable(
         Math.random() * GameService.WIDTH,
         0,
+        this.velocityMultiplier,
         velocity,
         imageName,
         itemName,
@@ -93,6 +105,7 @@ class Engine {
       return new NonRecyclable(
         Math.random() * GameService.WIDTH,
         0,
+        this.velocityMultiplier,
         velocity,
         imageName,
         itemName,
@@ -105,7 +118,6 @@ class Engine {
   generateFallingObject(): void {
     if (this.timeItemLastGenerated === undefined) {
       this.timeItemLastGenerated = Date.now();
-      console.log(this.timeItemLastGenerated);
       const randomObject = this.selectRandomObject();
       this.itemsToDraw.push(randomObject);
       FallingObject.onScreen.push(randomObject);
@@ -113,11 +125,15 @@ class Engine {
       const currentTime = Date.now();
       const timeDifferenceInSeconds =
         (currentTime - this.timeItemLastGenerated) / 1000;
-      const randomJitter = Math.random() * (Math.random() > 0.5 ? 1 : -1);
-      if (
-        timeDifferenceInSeconds >
-        this.avgTimeBetweenGenerations + randomJitter
-      ) {
+
+      let sumOfVelocities = 0;
+      for (let item of FallingObject.onScreen) {
+        sumOfVelocities += item.velocity * 60;
+      }
+      const avgVelocity = sumOfVelocities / FallingObject.onScreen.length;
+      const avgTimeToFall = GameService.HEIGHT / avgVelocity;
+      const intervalToGenerate = avgTimeToFall / this.maxObjectsOnScreen;
+      if (timeDifferenceInSeconds > intervalToGenerate) {
         const randomObject = this.selectRandomObject();
         this.itemsToDraw.push(randomObject);
         FallingObject.onScreen.push(randomObject);
@@ -142,9 +158,18 @@ class Engine {
   updateStats(typeOfStat: 'lives' | 'points', stat: number): void {
     if (typeOfStat === 'points') {
       this.scorekeeper!.addPoints(stat);
+      if (this.scorekeeper!.score in Engine.SCORE_TO_MULTIPLIER_MAP) {
+        this.increaseObjectSpeeds(
+          Engine.SCORE_TO_MULTIPLIER_MAP[this.scorekeeper!.score]
+        );
+      }
     } else {
       this.lifekeeper!.addLives(stat);
     }
+  }
+
+  increaseObjectSpeeds(multiplier: number): void {
+    this.velocityMultiplier = multiplier;
   }
 
   receiveArrowKey(direction: 'left' | 'right'): void {

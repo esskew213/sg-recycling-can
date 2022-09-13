@@ -25,13 +25,14 @@ export class Recyclable extends FallingObject {
   constructor(
     x: number,
     y: number,
+    velocityMultiplier: number,
     velocity: number,
     imageName: string,
     itemName: string,
     description: string,
     points: number
   ) {
-    super(x, y, velocity, imageName, itemName, description);
+    super(x, y, velocityMultiplier, velocity, imageName, itemName, description);
     this.#points = points;
   }
   collisionEffect(updatePlayerStats: Function): void {
@@ -44,13 +45,14 @@ export class NonRecyclable extends FallingObject {
   constructor(
     x: number,
     y: number,
+    velocityMultiplier: number,
     velocity: number,
     imageName: string,
     itemName: string,
     description: string,
     lifePenalty: number
   ) {
-    super(x, y, velocity, imageName, itemName, description);
+    super(x, y, velocityMultiplier, velocity, imageName, itemName, description);
     this.#lifePenalty = lifePenalty;
   }
   collisionEffect(updatePlayerStats: Function): void {

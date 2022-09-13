@@ -100,19 +100,20 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
         ],
         execute: function () {
             FallingObject = class FallingObject extends ObjectOnScreen_2.default {
-                constructor(x, y, velocity, imageName, itemName, description) {
+                constructor(x, y, velocityMultiplier, velocity, imageName, itemName, description) {
                     super();
                     _FallingObject_x.set(this, void 0);
                     _FallingObject_y.set(this, void 0);
                     _FallingObject_img.set(this, void 0);
                     this.hasCollided = false;
                     this.isOnScreen = true;
+                    this.velocityMultiplier = 1;
                     _FallingObject_velocity.set(this, void 0);
                     _FallingObject_itemName.set(this, void 0);
                     _FallingObject_description.set(this, void 0);
                     __classPrivateFieldSet(this, _FallingObject_x, x, "f");
                     __classPrivateFieldSet(this, _FallingObject_y, y, "f");
-                    __classPrivateFieldSet(this, _FallingObject_velocity, velocity, "f");
+                    __classPrivateFieldSet(this, _FallingObject_velocity, velocity * velocityMultiplier, "f");
                     __classPrivateFieldSet(this, _FallingObject_itemName, itemName, "f");
                     __classPrivateFieldSet(this, _FallingObject_description, description, "f");
                     __classPrivateFieldSet(this, _FallingObject_img, document.createElement('img'), "f");
@@ -123,6 +124,9 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
                 }
                 get y() {
                     return __classPrivateFieldGet(this, _FallingObject_y, "f");
+                }
+                get velocity() {
+                    return __classPrivateFieldGet(this, _FallingObject_velocity, "f");
                 }
                 draw(ctx) {
                     ctx.drawImage(__classPrivateFieldGet(this, _FallingObject_img, "f"), __classPrivateFieldGet(this, _FallingObject_x, "f"), __classPrivateFieldGet(this, _FallingObject_y, "f"));
@@ -157,8 +161,8 @@ System.register("drawable-objects/FallingObject", ["index", "drawable-objects/Ob
             FallingObject.IMAGE_EXTENSION = 'dist/images/';
             FallingObject.onScreen = [];
             ExtraLife = class ExtraLife extends FallingObject {
-                constructor(x, y) {
-                    super(x, y, ExtraLife.VELOCITY, ExtraLife.IMAGE_NAME, ExtraLife.ITEM_NAME, ExtraLife.ITEM_DESCRIPTION);
+                constructor(x, y, velocityMultiplier) {
+                    super(x, y, velocityMultiplier, ExtraLife.VELOCITY, ExtraLife.IMAGE_NAME, ExtraLife.ITEM_NAME, ExtraLife.ITEM_DESCRIPTION);
                     _ExtraLife_lifeBonus.set(this, 1);
                 }
                 collisionEffect(updatePlayerStats) {
@@ -263,8 +267,8 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
         ],
         execute: function () {
             Recyclable = class Recyclable extends FallingObject_1.default {
-                constructor(x, y, velocity, imageName, itemName, description, points) {
-                    super(x, y, velocity, imageName, itemName, description);
+                constructor(x, y, velocityMultiplier, velocity, imageName, itemName, description, points) {
+                    super(x, y, velocityMultiplier, velocity, imageName, itemName, description);
                     _Recyclable_points.set(this, void 0);
                     __classPrivateFieldSet(this, _Recyclable_points, points, "f");
                 }
@@ -275,8 +279,8 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
             exports_6("Recyclable", Recyclable);
             _Recyclable_points = new WeakMap();
             NonRecyclable = class NonRecyclable extends FallingObject_1.default {
-                constructor(x, y, velocity, imageName, itemName, description, lifePenalty) {
-                    super(x, y, velocity, imageName, itemName, description);
+                constructor(x, y, velocityMultiplier, velocity, imageName, itemName, description, lifePenalty) {
+                    super(x, y, velocityMultiplier, velocity, imageName, itemName, description);
                     _NonRecyclable_lifePenalty.set(this, void 0);
                     __classPrivateFieldSet(this, _NonRecyclable_lifePenalty, lifePenalty, "f");
                 }
@@ -395,6 +399,8 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     _Engine_backgroundImg.set(this, void 0);
                     this.itemsToDraw = [];
                     this.avgTimeBetweenGenerations = 3;
+                    this.maxObjectsOnScreen = 5;
+                    this.velocityMultiplier = 1;
                     const canvas = document.createElement('canvas');
                     canvas.width = GameService.WIDTH;
                     canvas.height = GameService.HEIGHT;
@@ -404,10 +410,10 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                 refreshScreen() {
                     this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
                     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
-                    console.log(this.itemsToDraw);
                     FallingObject_2.default.onScreen.forEach((item) => {
                         const boundUpdateStats = this.updateStats.bind(this);
                         item.update(this.paddle.x, this.paddle.width, this.paddle.height, boundUpdateStats);
+                        console.log(item.velocity);
                     });
                     this.generateFallingObject();
                     this.deleteOffscreenObjects();
@@ -426,21 +432,20 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     }
                     const randomNumber = Math.random();
                     if (randomNumber < Engine.BONUS_LIFE_PROBABILITY_CUTOFF) {
-                        return new FallingObject_3.ExtraLife(Math.random() * GameService.WIDTH, 0);
+                        return new FallingObject_3.ExtraLife(Math.random() * GameService.WIDTH, 0, this.velocityMultiplier);
                     }
                     else if (randomNumber < Engine.RECYCLABLE_PROBABILITY_CUTOFF) {
                         const { itemName, imageName, description, points, velocity } = pickRandomObjectFromList(Items_1.recyclableObjects);
-                        return new Items_1.Recyclable(Math.random() * GameService.WIDTH, 0, velocity, imageName, itemName, description, points);
+                        return new Items_1.Recyclable(Math.random() * GameService.WIDTH, 0, this.velocityMultiplier, velocity, imageName, itemName, description, points);
                     }
                     else {
                         const { itemName, imageName, description, lifePenalty, velocity } = pickRandomObjectFromList(Items_1.nonRecyclableObjects);
-                        return new Items_1.NonRecyclable(Math.random() * GameService.WIDTH, 0, velocity, imageName, itemName, description, lifePenalty);
+                        return new Items_1.NonRecyclable(Math.random() * GameService.WIDTH, 0, this.velocityMultiplier, velocity, imageName, itemName, description, lifePenalty);
                     }
                 }
                 generateFallingObject() {
                     if (this.timeItemLastGenerated === undefined) {
                         this.timeItemLastGenerated = Date.now();
-                        console.log(this.timeItemLastGenerated);
                         const randomObject = this.selectRandomObject();
                         this.itemsToDraw.push(randomObject);
                         FallingObject_2.default.onScreen.push(randomObject);
@@ -448,9 +453,14 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     else {
                         const currentTime = Date.now();
                         const timeDifferenceInSeconds = (currentTime - this.timeItemLastGenerated) / 1000;
-                        const randomJitter = Math.random() * (Math.random() > 0.5 ? 1 : -1);
-                        if (timeDifferenceInSeconds >
-                            this.avgTimeBetweenGenerations + randomJitter) {
+                        let sumOfVelocities = 0;
+                        for (let item of FallingObject_2.default.onScreen) {
+                            sumOfVelocities += item.velocity * 60;
+                        }
+                        const avgVelocity = sumOfVelocities / FallingObject_2.default.onScreen.length;
+                        const avgTimeToFall = GameService.HEIGHT / avgVelocity;
+                        const intervalToGenerate = avgTimeToFall / this.maxObjectsOnScreen;
+                        if (timeDifferenceInSeconds > intervalToGenerate) {
                             const randomObject = this.selectRandomObject();
                             this.itemsToDraw.push(randomObject);
                             FallingObject_2.default.onScreen.push(randomObject);
@@ -471,10 +481,16 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                 updateStats(typeOfStat, stat) {
                     if (typeOfStat === 'points') {
                         this.scorekeeper.addPoints(stat);
+                        if (this.scorekeeper.score in Engine.SCORE_TO_MULTIPLIER_MAP) {
+                            this.increaseObjectSpeeds(Engine.SCORE_TO_MULTIPLIER_MAP[this.scorekeeper.score]);
+                        }
                     }
                     else {
                         this.lifekeeper.addLives(stat);
                     }
+                }
+                increaseObjectSpeeds(multiplier) {
+                    this.velocityMultiplier = multiplier;
                 }
                 receiveArrowKey(direction) {
                     if (this.paddle !== undefined) {
@@ -500,6 +516,11 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
             Engine.BONUS_LIFE_PROBABILITY_CUTOFF = 0.04;
             Engine.RECYCLABLE_PROBABILITY_CUTOFF = 0.52;
             Engine.NONRECYCLABLE_PROBABILITY_CUTOFF = 1;
+            Engine.SCORE_TO_MULTIPLIER_MAP = {
+                '2': 1.5,
+                '3': 2,
+                '5': 3,
+            };
             GameService = class GameService {
                 constructor() {
                     this.gameState = 'notStarted';

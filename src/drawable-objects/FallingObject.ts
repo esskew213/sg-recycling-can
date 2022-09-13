@@ -10,6 +10,7 @@ export default abstract class FallingObject extends ObjectOnScreen {
   #img: HTMLImageElement;
   hasCollided: boolean = false;
   isOnScreen: boolean = true;
+  velocityMultiplier: number = 1;
   #velocity: number;
   #itemName: string;
   #description: string;
@@ -17,6 +18,7 @@ export default abstract class FallingObject extends ObjectOnScreen {
   constructor(
     x: number,
     y: number,
+    velocityMultiplier: number,
     velocity: number,
     imageName: string,
     itemName: string,
@@ -25,7 +27,7 @@ export default abstract class FallingObject extends ObjectOnScreen {
     super();
     this.#x = x;
     this.#y = y;
-    this.#velocity = velocity;
+    this.#velocity = velocity * velocityMultiplier;
     this.#itemName = itemName;
     this.#description = description;
     this.#img = document.createElement('img');
@@ -37,6 +39,9 @@ export default abstract class FallingObject extends ObjectOnScreen {
   }
   get y(): number {
     return this.#y;
+  }
+  get velocity(): number {
+    return this.#velocity;
   }
   public draw(ctx: CanvasRenderingContext2D): void {
     ctx.drawImage(this.#img, this.#x, this.#y);
@@ -83,10 +88,11 @@ export class ExtraLife extends FallingObject {
   static ITEM_NAME = 'Bonus life';
   static ITEM_DESCRIPTION = 'An extra life for you!';
   #lifeBonus = 1;
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, velocityMultiplier: number) {
     super(
       x,
       y,
+      velocityMultiplier,
       ExtraLife.VELOCITY,
       ExtraLife.IMAGE_NAME,
       ExtraLife.ITEM_NAME,

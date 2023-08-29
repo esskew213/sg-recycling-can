@@ -16,6 +16,7 @@ export default class Scorekeeper extends ObjectOnScreen {
   addPoints(points: number): void {
     this.#score += points;
   }
+
   draw(ctx: CanvasRenderingContext2D): void {
     ctx.font = 'bold 28px Courier New';
     ctx.fillStyle = 'white';

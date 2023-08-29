@@ -23,11 +23,9 @@ export default class Lifekeeper extends ObjectOnScreen {
     return this.#y;
   }
   addLives(lifeBonus: number): void {
-    console.log('lifebonus', this.#lives);
     const newNumberOfLives = this.#lives + lifeBonus;
     this.#lives = Math.min(Lifekeeper.MAX_LIVES, newNumberOfLives);
     if (newNumberOfLives === 0) {
-      console.log('game over');
       document.location.reload();
     }
   }

@@ -10,13 +10,26 @@ export default abstract class FallingObject extends ObjectOnScreen {
   #img: HTMLImageElement;
   hasCollided: boolean = false;
   isOnScreen: boolean = true;
+  velocityMultiplier: number = 1;
   #velocity: number;
+  #itemName: string;
+  #description: string;
 
-  constructor(x: number, y: number, velocity: number, imageName: string) {
+  constructor(
+    x: number,
+    y: number,
+    velocityMultiplier: number,
+    velocity: number,
+    imageName: string,
+    itemName: string,
+    description: string
+  ) {
     super();
     this.#x = x;
     this.#y = y;
-    this.#velocity = velocity;
+    this.#velocity = velocity * velocityMultiplier;
+    this.#itemName = itemName;
+    this.#description = description;
     this.#img = document.createElement('img');
     this.#img.src = `dist/images/${imageName}`;
   }
@@ -26,6 +39,9 @@ export default abstract class FallingObject extends ObjectOnScreen {
   }
   get y(): number {
     return this.#y;
+  }
+  get velocity(): number {
+    return this.#velocity;
   }
   public draw(ctx: CanvasRenderingContext2D): void {
     ctx.drawImage(this.#img, this.#x, this.#y);
@@ -38,17 +54,26 @@ export default abstract class FallingObject extends ObjectOnScreen {
       this.isOnScreen = false;
     }
   }
-  protected updateCollisionState(startX: number): void {
+  protected updateCollisionState(
+    startX: number,
+    paddleWidth: number,
+    paddleHeight: number
+  ): void {
     this.hasCollided =
       this.#x + this.#img.width > startX &&
-      this.#x < startX + Paddle.WIDTH &&
-      this.#y + this.#img.height > GameService.HEIGHT - Paddle.HEIGHT &&
+      this.#x < startX + paddleWidth &&
+      this.#y + this.#img.height > GameService.HEIGHT - paddleHeight &&
       this.#y < GameService.HEIGHT;
     this.isOnScreen = !this.hasCollided;
   }
-  public update(startX: number, updatePlayerStats: Function): void {
+  public update(
+    startX: number,
+    paddleWidth: number,
+    paddleHeight: number,
+    updatePlayerStats: Function
+  ): void {
     this.move();
-    this.updateCollisionState(startX);
+    this.updateCollisionState(startX, paddleWidth, paddleHeight);
     this.updateOnscreenState();
     if (this.hasCollided) {
       this.collisionEffect(updatePlayerStats);
@@ -60,9 +85,19 @@ export default abstract class FallingObject extends ObjectOnScreen {
 export class ExtraLife extends FallingObject {
   static VELOCITY = 3;
   static IMAGE_NAME = 'life.png';
+  static ITEM_NAME = 'Bonus life';
+  static ITEM_DESCRIPTION = 'An extra life for you!';
   #lifeBonus = 1;
-  constructor(x: number, y: number, velocity: number, imageName: string) {
-    super(x, y, velocity, imageName);
+  constructor(x: number, y: number, velocityMultiplier: number) {
+    super(
+      x,
+      y,
+      velocityMultiplier,
+      ExtraLife.VELOCITY,
+      ExtraLife.IMAGE_NAME,
+      ExtraLife.ITEM_NAME,
+      ExtraLife.ITEM_DESCRIPTION
+    );
   }
   collisionEffect(updatePlayerStats: Function): void {
     updatePlayerStats('lives', this.#lifeBonus);

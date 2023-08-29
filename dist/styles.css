@@ -553,8 +553,16 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.relative{
+  position: relative;
+}
+
 .mb-2{
   margin-bottom: 0.5rem;
+}
+
+.inline-block{
+  display: inline-block;
 }
 
 .flex{
@@ -569,18 +577,13 @@ video {
   align-items: center;
 }
 
-.bg-slate-600{
+.bg-cyan-900{
   --tw-bg-opacity: 1;
-  background-color: rgb(71 85 105 / var(--tw-bg-opacity));
+  background-color: rgb(22 78 99 / var(--tw-bg-opacity));
 }
 
-.bg-green-200{
-  --tw-bg-opacity: 1;
-  background-color: rgb(187 247 208 / var(--tw-bg-opacity));
-}
-
-.align-middle{
-  vertical-align: middle;
+.pr-2{
+  padding-right: 0.5rem;
 }
 
 .font-serif{
@@ -592,11 +595,30 @@ video {
   line-height: 1;
 }
 
-.text-slate-600{
+.text-white{
   --tw-text-opacity: 1;
-  color: rgb(71 85 105 / var(--tw-text-opacity));
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .filter{
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.menu{
+  position: absolute;
+  top: 0px;
+  display: block;
+  height: 600px;
+  width: 600px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+  padding: 2rem;
+  font-family: IBM Plex Mono, monospace;
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+  opacity: 0.8;
+}
+
+.menu--hidden{
+  display: none;
 }

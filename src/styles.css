@@ -3,3 +3,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.menu {
+  @apply font-serif p-8 bg-slate-800 text-white absolute top-0 block opacity-80 w-[600px] h-[600px];
+}
+
+.menu--hidden {
+  @apply hidden;
+}

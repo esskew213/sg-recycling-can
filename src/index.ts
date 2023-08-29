@@ -1,7 +1,7 @@
 import ObjectOnScreen from './drawable-objects/ObjectOnScreen';
 import FallingObject from './drawable-objects/FallingObject';
-import Paddle from './drawable-objects/Paddle';
 import Background from './drawable-objects/Background';
+import Paddle from './drawable-objects/Paddle';
 import Scorekeeper from './drawable-objects/Scorekeeper';
 import {
   DictionaryOfObjects,
@@ -12,12 +12,16 @@ import {
 } from './drawable-objects/Items';
 import { ExtraLife } from './drawable-objects/FallingObject';
 import Lifekeeper from './drawable-objects/Lifekeeper';
-
+import Menu from './Menu';
 class Engine {
-  static MAX_FALLING_OBJECTS: number = 8;
-  static BONUS_LIFE_PROBABILITY: number = 0.01;
-  static OBJECT_PROBABILITY: number = 0.04;
-  static RECYCLABLE_PROBABILITY: number = 0.5;
+  static BONUS_LIFE_PROBABILITY_CUTOFF: number = 0.04;
+  static RECYCLABLE_PROBABILITY_CUTOFF: number = 0.52;
+  static NONRECYCLABLE_PROBABILITY_CUTOFF: number = 1;
+  static SCORE_TO_MULTIPLIER_MAP: { [key: string]: number } = {
+    '2': 1.5,
+    '3': 2,
+    '5': 3,
+  };
 
   fallingObjects: FallingObject[] = [];
   paddle?: Paddle;
@@ -26,6 +30,11 @@ class Engine {
   #backgroundImg?: Background;
   ctx: CanvasRenderingContext2D;
   itemsToDraw: ObjectOnScreen[] = [];
+  interval?: number;
+  timeItemLastGenerated?: number;
+  avgTimeBetweenGenerations: number = 3;
+  maxObjectsOnScreen: number = 5;
+  velocityMultiplier: number = 1;
 
   constructor(element: Element) {
     const canvas = document.createElement('canvas');
@@ -40,11 +49,16 @@ class Engine {
     this.itemsToDraw.forEach((item) => item.draw(this.ctx));
     FallingObject.onScreen.forEach((item) => {
       const boundUpdateStats = this.updateStats.bind(this);
-      item.update(this.paddle!.x, boundUpdateStats);
+      item.update(
+        this.paddle!.x,
+        this.paddle!.width,
+        this.paddle!.height,
+        boundUpdateStats
+      );
+      console.log(item.velocity);
     });
     this.generateFallingObject();
     this.deleteOffscreenObjects();
-    console.log(this.scorekeeper!.score);
   }
 
   startGame(): void {
@@ -52,60 +66,78 @@ class Engine {
     this.paddle = new Paddle();
     this.scorekeeper = new Scorekeeper();
     this.lifekeeper = new Lifekeeper();
-    let interval = setInterval(() => this.refreshScreen(), 16.7);
+    this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
   }
 
-  generateFallingObject(): void {
-    function pickRandomObject<T>(dictionary: DictionaryOfObjects<T>): T {
+  selectRandomObject(): FallingObject {
+    function pickRandomObjectFromList<T>(
+      dictionary: DictionaryOfObjects<T>
+    ): T {
       const randomNumber: number = Math.floor(
         Math.random() * Object.keys(dictionary).length
       );
-      console.log(randomNumber);
       return Object.values(dictionary)[randomNumber];
     }
 
-    if (FallingObject.onScreen.length < Engine.MAX_FALLING_OBJECTS) {
-      if (Math.random() < Engine.BONUS_LIFE_PROBABILITY) {
-        const newFallingObject: FallingObject = new ExtraLife(
-          Math.random() * GameService.WIDTH,
-          0,
-          ExtraLife.VELOCITY,
-          ExtraLife.IMAGE_NAME
-        );
-        this.itemsToDraw.push(newFallingObject);
-        FallingObject.onScreen.push(newFallingObject);
-      } else if (
-        Math.random() <
-        Engine.BONUS_LIFE_PROBABILITY + Engine.OBJECT_PROBABILITY
-      ) {
-        let newFallingObject: FallingObject;
-        if (Math.random() < Engine.RECYCLABLE_PROBABILITY) {
-          const { itemName, imageName, description, points, velocity } =
-            pickRandomObject(recyclableObjects);
-          newFallingObject = new Recyclable(
-            Math.random() * GameService.WIDTH,
-            0,
-            velocity,
-            imageName,
-            itemName,
-            description,
-            points
-          );
-        } else {
-          const { itemName, imageName, description, lifePenalty, velocity } =
-            pickRandomObject(nonRecyclableObjects);
-          newFallingObject = new NonRecyclable(
-            Math.random() * GameService.WIDTH,
-            0,
-            velocity,
-            imageName,
-            itemName,
-            description,
-            lifePenalty
-          );
-        }
-        this.itemsToDraw.push(newFallingObject);
-        FallingObject.onScreen.push(newFallingObject);
+    const randomNumber = Math.random();
+    if (randomNumber < Engine.BONUS_LIFE_PROBABILITY_CUTOFF) {
+      return new ExtraLife(
+        Math.random() * GameService.WIDTH,
+        0,
+        this.velocityMultiplier
+      );
+    } else if (randomNumber < Engine.RECYCLABLE_PROBABILITY_CUTOFF) {
+      const { itemName, imageName, description, points, velocity } =
+        pickRandomObjectFromList(recyclableObjects);
+      return new Recyclable(
+        Math.random() * GameService.WIDTH,
+        0,
+        this.velocityMultiplier,
+        velocity,
+        imageName,
+        itemName,
+        description,
+        points
+      );
+    } else {
+      const { itemName, imageName, description, lifePenalty, velocity } =
+        pickRandomObjectFromList(nonRecyclableObjects);
+      return new NonRecyclable(
+        Math.random() * GameService.WIDTH,
+        0,
+        this.velocityMultiplier,
+        velocity,
+        imageName,
+        itemName,
+        description,
+        lifePenalty
+      );
+    }
+  }
+
+  generateFallingObject(): void {
+    if (this.timeItemLastGenerated === undefined) {
+      this.timeItemLastGenerated = Date.now();
+      const randomObject = this.selectRandomObject();
+      this.itemsToDraw.push(randomObject);
+      FallingObject.onScreen.push(randomObject);
+    } else {
+      const currentTime = Date.now();
+      const timeDifferenceInSeconds =
+        (currentTime - this.timeItemLastGenerated) / 1000;
+
+      let sumOfVelocities = 0;
+      for (let item of FallingObject.onScreen) {
+        sumOfVelocities += item.velocity * 60;
+      }
+      const avgVelocity = sumOfVelocities / FallingObject.onScreen.length;
+      const avgTimeToFall = GameService.HEIGHT / avgVelocity;
+      const intervalToGenerate = avgTimeToFall / this.maxObjectsOnScreen;
+      if (timeDifferenceInSeconds > intervalToGenerate) {
+        const randomObject = this.selectRandomObject();
+        this.itemsToDraw.push(randomObject);
+        FallingObject.onScreen.push(randomObject);
+        this.timeItemLastGenerated = currentTime;
       }
     }
   }
@@ -126,9 +158,18 @@ class Engine {
   updateStats(typeOfStat: 'lives' | 'points', stat: number): void {
     if (typeOfStat === 'points') {
       this.scorekeeper!.addPoints(stat);
+      if (this.scorekeeper!.score in Engine.SCORE_TO_MULTIPLIER_MAP) {
+        this.increaseObjectSpeeds(
+          Engine.SCORE_TO_MULTIPLIER_MAP[this.scorekeeper!.score]
+        );
+      }
     } else {
       this.lifekeeper!.addLives(stat);
     }
+  }
+
+  increaseObjectSpeeds(multiplier: number): void {
+    this.velocityMultiplier = multiplier;
   }
 
   receiveArrowKey(direction: 'left' | 'right'): void {
@@ -140,29 +181,58 @@ class Engine {
       }
     }
   }
+
+  pauseAndResume(action: 'pause' | 'resume'): void {
+    if (action === 'pause') {
+      clearInterval(this.interval);
+      // this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
+    } else if (action === 'resume') {
+      this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+    }
+  }
+
+  gameOver(): void {
+    clearInterval(this.interval);
+  }
 }
 
 export default class GameService {
-  static WIDTH: number = 300;
+  static WIDTH: number = 600;
   static HEIGHT: number = 600;
   static BACKGROUND_COLOUR: string = 'cornflowerblue';
   engine: Engine;
+  menu: Menu;
   gameState: 'notStarted' | 'started' | 'paused' | 'gameOver' = 'notStarted';
 
   constructor() {
     const gameContainer = document.querySelector('.game-container')!;
     this.engine = new Engine(gameContainer);
+    this.menu = new Menu(gameContainer);
     window.addEventListener('keydown', (e) => this.listenToKeypress(e));
   }
 
   listenToKeypress(e: KeyboardEvent): void {
     if (e.key === 'Enter' && this.gameState === 'notStarted') {
       this.gameState = 'started';
+      this.menu.receiveAction('toggle');
       this.engine.startGame();
     } else if (e.key === 'ArrowRight' && this.gameState === 'started') {
       this.engine.receiveArrowKey('right');
     } else if (e.key === 'ArrowLeft' && this.gameState === 'started') {
       this.engine.receiveArrowKey('left');
+    } else if (e.key === 'Enter' && this.gameState === 'started') {
+      this.gameState = 'paused';
+      this.menu.receiveAction('toggle');
+      this.engine.pauseAndResume('pause');
+    } else if (e.key === 'Enter' && this.gameState === 'paused') {
+      this.gameState = 'started';
+      this.menu.receiveAction('toggle');
+      this.engine.pauseAndResume('resume');
+    } else if (
+      (e.key === 'q' || e.key === 'Q') &&
+      this.gameState === 'paused'
+    ) {
+      this.gameState = 'gameOver';
     }
   }
 }

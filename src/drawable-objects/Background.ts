@@ -16,6 +16,9 @@ export default class Background extends ObjectOnScreen {
     return this.#y;
   }
   draw(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
     ctx.drawImage(this.#img, this.#x, this.#y);
+    ctx.restore();
   }
 }

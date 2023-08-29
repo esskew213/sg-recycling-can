@@ -561,6 +561,10 @@ video {
   margin-bottom: 0.5rem;
 }
 
+.inline-block{
+  display: inline-block;
+}
+
 .flex{
   display: flex;
 }
@@ -576,6 +580,10 @@ video {
 .bg-cyan-900{
   --tw-bg-opacity: 1;
   background-color: rgb(22 78 99 / var(--tw-bg-opacity));
+}
+
+.pr-2{
+  padding-right: 0.5rem;
 }
 
 .font-serif{
@@ -601,9 +609,10 @@ video {
   top: 0px;
   display: block;
   height: 600px;
-  width: 300px;
+  width: 600px;
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+  padding: 2rem;
   font-family: IBM Plex Mono, monospace;
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));

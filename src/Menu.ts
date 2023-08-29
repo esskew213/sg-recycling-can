@@ -13,11 +13,8 @@ export default class Menu {
   allItems;
   constructor(element: Element) {
     this.menu = document.createElement('div');
-    this.menu.setAttribute('width', GameService.WIDTH.toString());
-    this.menu.setAttribute('height', GameService.HEIGHT.toString());
     this.menu.classList.add('menu');
-    this.menu.innerHTML =
-      'PRESS ENTER TO START GAME<br />PRESS P TO PAUSE AND UNPAUSE<br />PRESS Q TO QUIT<br />';
+    this.menu.innerHTML = 'PRESS ENTER TO START AND STOP THE GAME<br /><br />';
 
     const recyclableItems = Object.values(recyclableObjects).map((item) => {
       return {
@@ -39,14 +36,14 @@ export default class Menu {
     const listOfItems: HTMLUListElement = document.createElement('ul');
     this.allItems.forEach((item) => {
       const li: HTMLLIElement = document.createElement('li');
-      li.textContent = `${item.itemName}: ${item.description}`;
+      li.innerHTML = `<img src="dist/images/${item.imageName}" class='inline-block pr-2 mb-2'/>${item.itemName}: ${item.description}`;
       listOfItems.appendChild(li);
     });
     this.menu.appendChild(listOfItems);
     element.appendChild(this.menu);
   }
 
-  receiveKeypress(): void {
+  receiveAction(keypress: 'toggle'): void {
     this.menu.classList.toggle('menu--hidden');
   }
 }

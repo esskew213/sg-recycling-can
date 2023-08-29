@@ -2,7 +2,7 @@ import ObjectOnScreen from './ObjectOnScreen';
 import GameService from '../index';
 
 export default class Paddle extends ObjectOnScreen {
-  static SPEED: number = 10;
+  static SPEED: number = 15;
 
   #x: number;
   #y: number;

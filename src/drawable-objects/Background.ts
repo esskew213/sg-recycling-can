@@ -8,7 +8,6 @@ export default class Background extends ObjectOnScreen {
     super();
     this.#img = document.createElement('img');
     this.#img.src = 'dist/images/background.png';
-    console.log('background drawn');
   }
   get x(): number {
     return this.#x;
@@ -17,6 +16,9 @@ export default class Background extends ObjectOnScreen {
     return this.#y;
   }
   draw(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
     ctx.drawImage(this.#img, this.#x, this.#y);
+    ctx.restore();
   }
 }

@@ -68,6 +68,20 @@ export const recyclableObjects: DictionaryOfObjects<RecyclableDescription> = {
     points: 1,
     velocity: 2,
   },
+  recyclable002: {
+    itemName: 'Red packet',
+    imageName: 'redPacket.png',
+    description: 'Red packets can be recycled!',
+    points: 1,
+    velocity: 2,
+  },
+  recyclable003: {
+    itemName: 'Plastic bottle',
+    imageName: 'plasticBottle.png',
+    description: 'Plastic bottles can be recycled.',
+    points: 1,
+    velocity: 2,
+  },
 };
 
 export const nonRecyclableObjects: DictionaryOfObjects<NonRecyclableDescription> =
@@ -76,6 +90,27 @@ export const nonRecyclableObjects: DictionaryOfObjects<NonRecyclableDescription>
       itemName: 'Crisps bag',
       imageName: 'crispsBag.png',
       description: "Foil-lined bags can't be recycled!",
+      lifePenalty: -1,
+      velocity: 2,
+    },
+    nonrecyclable002: {
+      itemName: 'Shoes',
+      imageName: 'shoes.png',
+      description: "Your kicks can't be recycled!",
+      lifePenalty: -1,
+      velocity: 2,
+    },
+    nonrecyclable003: {
+      itemName: 'Pyrex',
+      imageName: 'pyrex.png',
+      description: "Pyrex containers can't be recycled. :0",
+      lifePenalty: -1,
+      velocity: 2,
+    },
+    nonrecyclable004: {
+      itemName: 'Tissue',
+      imageName: 'tissue.png',
+      description: "Tissues can't be recycled! Eww!",
       lifePenalty: -1,
       velocity: 2,
     },

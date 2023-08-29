@@ -81,7 +81,7 @@ System.register("drawable-objects/Paddle", ["drawable-objects/ObjectOnScreen", "
             };
             exports_2("default", Paddle);
             _Paddle_x = new WeakMap(), _Paddle_y = new WeakMap(), _Paddle_img = new WeakMap();
-            Paddle.SPEED = 10;
+            Paddle.SPEED = 15;
         }
     };
 });
@@ -197,7 +197,6 @@ System.register("drawable-objects/Background", ["drawable-objects/ObjectOnScreen
                     _Background_img.set(this, void 0);
                     __classPrivateFieldSet(this, _Background_img, document.createElement('img'), "f");
                     __classPrivateFieldGet(this, _Background_img, "f").src = 'dist/images/background.png';
-                    console.log('background drawn');
                 }
                 get x() {
                     return __classPrivateFieldGet(this, _Background_x, "f");
@@ -206,7 +205,10 @@ System.register("drawable-objects/Background", ["drawable-objects/ObjectOnScreen
                     return __classPrivateFieldGet(this, _Background_y, "f");
                 }
                 draw(ctx) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.3;
                     ctx.drawImage(__classPrivateFieldGet(this, _Background_img, "f"), __classPrivateFieldGet(this, _Background_x, "f"), __classPrivateFieldGet(this, _Background_y, "f"));
+                    ctx.restore();
                 }
             };
             exports_4("default", Background);
@@ -298,12 +300,47 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
                     points: 1,
                     velocity: 2,
                 },
+                recyclable002: {
+                    itemName: 'Red packet',
+                    imageName: 'redPacket.png',
+                    description: 'Red packets can be recycled!',
+                    points: 1,
+                    velocity: 2,
+                },
+                recyclable003: {
+                    itemName: 'Plastic bottle',
+                    imageName: 'plasticBottle.png',
+                    description: 'Plastic bottles can be recycled.',
+                    points: 1,
+                    velocity: 2,
+                },
             });
             exports_6("nonRecyclableObjects", nonRecyclableObjects = {
                 nonrecyclable001: {
                     itemName: 'Crisps bag',
                     imageName: 'crispsBag.png',
                     description: "Foil-lined bags can't be recycled!",
+                    lifePenalty: -1,
+                    velocity: 2,
+                },
+                nonrecyclable002: {
+                    itemName: 'Shoes',
+                    imageName: 'shoes.png',
+                    description: "Your kicks can't be recycled!",
+                    lifePenalty: -1,
+                    velocity: 2,
+                },
+                nonrecyclable003: {
+                    itemName: 'Pyrex',
+                    imageName: 'pyrex.png',
+                    description: "Pyrex containers can't be recycled. :0",
+                    lifePenalty: -1,
+                    velocity: 2,
+                },
+                nonrecyclable004: {
+                    itemName: 'Tissue',
+                    imageName: 'tissue.png',
+                    description: "Tissues can't be recycled! Eww!",
                     lifePenalty: -1,
                     velocity: 2,
                 },
@@ -511,6 +548,9 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                         this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
                     }
                 }
+                gameOver() {
+                    clearInterval(this.interval);
+                }
             };
             _Engine_backgroundImg = new WeakMap();
             Engine.BONUS_LIFE_PROBABILITY_CUTOFF = 0.04;
@@ -532,7 +572,7 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                 listenToKeypress(e) {
                     if (e.key === 'Enter' && this.gameState === 'notStarted') {
                         this.gameState = 'started';
-                        this.menu.receiveKeypress();
+                        this.menu.receiveAction('toggle');
                         this.engine.startGame();
                     }
                     else if (e.key === 'ArrowRight' && this.gameState === 'started') {
@@ -541,37 +581,36 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     else if (e.key === 'ArrowLeft' && this.gameState === 'started') {
                         this.engine.receiveArrowKey('left');
                     }
-                    else if ((e.key === 'p' || e.key === 'P') &&
-                        this.gameState === 'started') {
+                    else if (e.key === 'Enter' && this.gameState === 'started') {
                         this.gameState = 'paused';
-                        this.menu.receiveKeypress();
+                        this.menu.receiveAction('toggle');
                         this.engine.pauseAndResume('pause');
                     }
-                    else if ((e.key === 'p' || e.key === 'P') &&
-                        this.gameState === 'paused') {
+                    else if (e.key === 'Enter' && this.gameState === 'paused') {
                         this.gameState = 'started';
-                        this.menu.receiveKeypress();
+                        this.menu.receiveAction('toggle');
                         this.engine.pauseAndResume('resume');
+                    }
+                    else if ((e.key === 'q' || e.key === 'Q') &&
+                        this.gameState === 'paused') {
+                        this.gameState = 'gameOver';
                     }
                 }
             };
             exports_8("default", GameService);
-            GameService.WIDTH = 300;
+            GameService.WIDTH = 600;
             GameService.HEIGHT = 600;
             GameService.BACKGROUND_COLOUR = 'cornflowerblue';
             gameService = new GameService();
         }
     };
 });
-System.register("Menu", ["index", "drawable-objects/Items"], function (exports_9, context_9) {
+System.register("Menu", ["drawable-objects/Items"], function (exports_9, context_9) {
     "use strict";
-    var index_4, Items_2, Menu;
+    var Items_2, Menu;
     var __moduleName = context_9 && context_9.id;
     return {
         setters: [
-            function (index_4_1) {
-                index_4 = index_4_1;
-            },
             function (Items_2_1) {
                 Items_2 = Items_2_1;
             }
@@ -580,11 +619,8 @@ System.register("Menu", ["index", "drawable-objects/Items"], function (exports_9
             Menu = class Menu {
                 constructor(element) {
                     this.menu = document.createElement('div');
-                    this.menu.setAttribute('width', index_4.default.WIDTH.toString());
-                    this.menu.setAttribute('height', index_4.default.HEIGHT.toString());
                     this.menu.classList.add('menu');
-                    this.menu.innerHTML =
-                        'PRESS ENTER TO START GAME<br />PRESS P TO PAUSE AND UNPAUSE<br />PRESS Q TO QUIT<br />';
+                    this.menu.innerHTML = 'PRESS ENTER TO START AND STOP THE GAME<br /><br />';
                     const recyclableItems = Object.values(Items_2.recyclableObjects).map((item) => {
                         return {
                             itemName: item.itemName,
@@ -603,13 +639,13 @@ System.register("Menu", ["index", "drawable-objects/Items"], function (exports_9
                     const listOfItems = document.createElement('ul');
                     this.allItems.forEach((item) => {
                         const li = document.createElement('li');
-                        li.textContent = `${item.itemName}: ${item.description}`;
+                        li.innerHTML = `<img src="dist/images/${item.imageName}" class='inline-block pr-2 mb-2'/>${item.itemName}: ${item.description}`;
                         listOfItems.appendChild(li);
                     });
                     this.menu.appendChild(listOfItems);
                     element.appendChild(this.menu);
                 }
-                receiveKeypress() {
+                receiveAction(keypress) {
                     this.menu.classList.toggle('menu--hidden');
                 }
             };

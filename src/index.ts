@@ -190,10 +190,14 @@ class Engine {
       this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
     }
   }
+
+  gameOver(): void {
+    clearInterval(this.interval);
+  }
 }
 
 export default class GameService {
-  static WIDTH: number = 300;
+  static WIDTH: number = 600;
   static HEIGHT: number = 600;
   static BACKGROUND_COLOUR: string = 'cornflowerblue';
   engine: Engine;
@@ -210,26 +214,25 @@ export default class GameService {
   listenToKeypress(e: KeyboardEvent): void {
     if (e.key === 'Enter' && this.gameState === 'notStarted') {
       this.gameState = 'started';
-      this.menu.receiveKeypress();
+      this.menu.receiveAction('toggle');
       this.engine.startGame();
     } else if (e.key === 'ArrowRight' && this.gameState === 'started') {
       this.engine.receiveArrowKey('right');
     } else if (e.key === 'ArrowLeft' && this.gameState === 'started') {
       this.engine.receiveArrowKey('left');
-    } else if (
-      (e.key === 'p' || e.key === 'P') &&
-      this.gameState === 'started'
-    ) {
+    } else if (e.key === 'Enter' && this.gameState === 'started') {
       this.gameState = 'paused';
-      this.menu.receiveKeypress();
+      this.menu.receiveAction('toggle');
       this.engine.pauseAndResume('pause');
+    } else if (e.key === 'Enter' && this.gameState === 'paused') {
+      this.gameState = 'started';
+      this.menu.receiveAction('toggle');
+      this.engine.pauseAndResume('resume');
     } else if (
-      (e.key === 'p' || e.key === 'P') &&
+      (e.key === 'q' || e.key === 'Q') &&
       this.gameState === 'paused'
     ) {
-      this.gameState = 'started';
-      this.menu.receiveKeypress();
-      this.engine.pauseAndResume('resume');
+      this.gameState = 'gameOver';
     }
   }
 }

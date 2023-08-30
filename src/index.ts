@@ -3,6 +3,7 @@ import FallingObject from './drawable-objects/FallingObject';
 import Background from './drawable-objects/Background';
 import Paddle from './drawable-objects/Paddle';
 import Scorekeeper from './drawable-objects/Scorekeeper';
+import GameOverScreen from './gameOverScreen';
 import {
   DictionaryOfObjects,
   Recyclable,
@@ -35,6 +36,7 @@ class Engine {
   avgTimeBetweenGenerations: number = 3;
   maxObjectsOnScreen: number = 5;
   velocityMultiplier: number = 1;
+  gameOverScreen;
 
   constructor(element: Element) {
     const canvas = document.createElement('canvas');
@@ -42,6 +44,7 @@ class Engine {
     canvas.height = GameService.HEIGHT;
     element.appendChild(canvas);
     this.ctx = canvas.getContext('2d')!;
+    this.gameOverScreen = new GameOverScreen(element);
   }
 
   refreshScreen(): void {
@@ -67,6 +70,8 @@ class Engine {
     this.scorekeeper = new Scorekeeper();
     this.lifekeeper = new Lifekeeper();
     this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+
+    GameService.GAME_STATE = 'started';
   }
 
   selectRandomObject(): FallingObject {
@@ -166,6 +171,9 @@ class Engine {
     } else {
       this.lifekeeper!.addLives(stat);
     }
+    if (this.lifekeeper!.lives === 0) {
+      this.gameOver(this.scorekeeper!.score);
+    }
   }
 
   increaseObjectSpeeds(multiplier: number): void {
@@ -183,15 +191,21 @@ class Engine {
   }
 
   pauseAndResume(action: 'pause' | 'resume'): void {
-    if (action === 'pause') {
-      clearInterval(this.interval);
-      // this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
-    } else if (action === 'resume') {
-      this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+    if (GameService.GAME_STATE !== 'gameOver') {
+      if (action === 'pause') {
+        GameService.GAME_STATE = 'paused';
+        clearInterval(this.interval);
+        // this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
+      } else if (action === 'resume') {
+        GameService.GAME_STATE = 'started';
+        this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+      }
     }
   }
 
-  gameOver(): void {
+  gameOver(score: number): void {
+    GameService.GAME_STATE = 'gameOver';
+    this.gameOverScreen.displayGameOver(score);
     clearInterval(this.interval);
   }
 }
@@ -200,9 +214,10 @@ export default class GameService {
   static WIDTH: number = 600;
   static HEIGHT: number = 600;
   static BACKGROUND_COLOUR: string = 'cornflowerblue';
+  static GAME_STATE: 'notStarted' | 'started' | 'paused' | 'gameOver' =
+    'notStarted';
   engine: Engine;
   menu: Menu;
-  gameState: 'notStarted' | 'started' | 'paused' | 'gameOver' = 'notStarted';
 
   constructor() {
     const gameContainer = document.querySelector('.game-container')!;
@@ -212,27 +227,25 @@ export default class GameService {
   }
 
   listenToKeypress(e: KeyboardEvent): void {
-    if (e.key === 'Enter' && this.gameState === 'notStarted') {
-      this.gameState = 'started';
+    if (e.key === 'Enter' && GameService.GAME_STATE === 'notStarted') {
+      GameService.GAME_STATE = 'started';
       this.menu.receiveAction('toggle');
       this.engine.startGame();
-    } else if (e.key === 'ArrowRight' && this.gameState === 'started') {
+    } else if (e.key === 'ArrowRight' && GameService.GAME_STATE === 'started') {
       this.engine.receiveArrowKey('right');
-    } else if (e.key === 'ArrowLeft' && this.gameState === 'started') {
+    } else if (e.key === 'ArrowLeft' && GameService.GAME_STATE === 'started') {
       this.engine.receiveArrowKey('left');
-    } else if (e.key === 'Enter' && this.gameState === 'started') {
-      this.gameState = 'paused';
+    } else if (e.key === 'Enter' && GameService.GAME_STATE === 'started') {
+      GameService.GAME_STATE = 'paused';
       this.menu.receiveAction('toggle');
       this.engine.pauseAndResume('pause');
-    } else if (e.key === 'Enter' && this.gameState === 'paused') {
-      this.gameState = 'started';
+    } else if (e.key === 'Enter' && GameService.GAME_STATE === 'paused') {
+      GameService.GAME_STATE = 'started';
       this.menu.receiveAction('toggle');
       this.engine.pauseAndResume('resume');
-    } else if (
-      (e.key === 'q' || e.key === 'Q') &&
-      this.gameState === 'paused'
-    ) {
-      this.gameState = 'gameOver';
+    } else if (e.key === 'Enter' && GameService.GAME_STATE === 'gameOver') {
+      console.log(GameService.GAME_STATE);
+      document.location.reload();
     }
   }
 }

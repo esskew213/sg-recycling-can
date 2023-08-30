@@ -11,3 +11,11 @@
 .menu--hidden {
   @apply hidden;
 }
+
+.gameOver {
+  @apply font-serif p-8 pt-16 bg-slate-800 text-white absolute top-0 block w-[600px] h-[600px] text-center text-lg font-bold;
+}
+
+.gameOver--hidden {
+  @apply hidden;
+}

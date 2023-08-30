@@ -348,10 +348,33 @@ System.register("drawable-objects/Items", ["drawable-objects/FallingObject"], fu
         }
     };
 });
-System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen", "index"], function (exports_7, context_7) {
+System.register("gameOverScreen", [], function (exports_7, context_7) {
+    "use strict";
+    var GameOverScreen;
+    var __moduleName = context_7 && context_7.id;
+    return {
+        setters: [],
+        execute: function () {
+            GameOverScreen = class GameOverScreen {
+                constructor(element) {
+                    this.gameOverScreen = document.createElement('div');
+                    this.gameOverScreen.classList.add('gameOver');
+                    this.gameOverScreen.classList.toggle('gameOver--hidden');
+                    element.appendChild(this.gameOverScreen);
+                }
+                displayGameOver(score) {
+                    this.gameOverScreen.innerHTML = `GAME OVER!<br />YOUR SCORE: ${score}<br /><br />Think you can recycle better?<br />Press Enter to play again.`;
+                    this.gameOverScreen.classList.toggle('gameOver--hidden');
+                }
+            };
+            exports_7("default", GameOverScreen);
+        }
+    };
+});
+System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen", "index"], function (exports_8, context_8) {
     "use strict";
     var _Lifekeeper_lives, _Lifekeeper_x, _Lifekeeper_y, _Lifekeeper_img, ObjectOnScreen_5, index_3, Lifekeeper;
-    var __moduleName = context_7 && context_7.id;
+    var __moduleName = context_8 && context_8.id;
     return {
         setters: [
             function (ObjectOnScreen_5_1) {
@@ -385,7 +408,7 @@ System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen
                     const newNumberOfLives = __classPrivateFieldGet(this, _Lifekeeper_lives, "f") + lifeBonus;
                     __classPrivateFieldSet(this, _Lifekeeper_lives, Math.min(Lifekeeper.MAX_LIVES, newNumberOfLives), "f");
                     if (newNumberOfLives === 0) {
-                        document.location.reload();
+                        // document.location.reload();
                     }
                 }
                 draw(ctx) {
@@ -394,16 +417,16 @@ System.register("drawable-objects/Lifekeeper", ["drawable-objects/ObjectOnScreen
                     }
                 }
             };
-            exports_7("default", Lifekeeper);
+            exports_8("default", Lifekeeper);
             _Lifekeeper_lives = new WeakMap(), _Lifekeeper_x = new WeakMap(), _Lifekeeper_y = new WeakMap(), _Lifekeeper_img = new WeakMap();
             Lifekeeper.MAX_LIVES = 3;
         }
     };
 });
-System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Background", "drawable-objects/Paddle", "drawable-objects/Scorekeeper", "drawable-objects/Items", "drawable-objects/Lifekeeper", "Menu"], function (exports_8, context_8) {
+System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Background", "drawable-objects/Paddle", "drawable-objects/Scorekeeper", "gameOverScreen", "drawable-objects/Items", "drawable-objects/Lifekeeper", "Menu"], function (exports_9, context_9) {
     "use strict";
-    var _Engine_backgroundImg, FallingObject_2, Background_1, Paddle_1, Scorekeeper_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
-    var __moduleName = context_8 && context_8.id;
+    var _Engine_backgroundImg, FallingObject_2, Background_1, Paddle_1, Scorekeeper_1, gameOverScreen_1, Items_1, FallingObject_3, Lifekeeper_1, Menu_1, Engine, GameService, gameService;
+    var __moduleName = context_9 && context_9.id;
     return {
         setters: [
             function (FallingObject_2_1) {
@@ -418,6 +441,9 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
             },
             function (Scorekeeper_1_1) {
                 Scorekeeper_1 = Scorekeeper_1_1;
+            },
+            function (gameOverScreen_1_1) {
+                gameOverScreen_1 = gameOverScreen_1_1;
             },
             function (Items_1_1) {
                 Items_1 = Items_1_1;
@@ -443,6 +469,7 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     canvas.height = GameService.HEIGHT;
                     element.appendChild(canvas);
                     this.ctx = canvas.getContext('2d');
+                    this.gameOverScreen = new gameOverScreen_1.default(element);
                 }
                 refreshScreen() {
                     this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
@@ -461,6 +488,7 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     this.scorekeeper = new Scorekeeper_1.default();
                     this.lifekeeper = new Lifekeeper_1.default();
                     this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+                    GameService.GAME_STATE = 'started';
                 }
                 selectRandomObject() {
                     function pickRandomObjectFromList(dictionary) {
@@ -525,6 +553,9 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     else {
                         this.lifekeeper.addLives(stat);
                     }
+                    if (this.lifekeeper.lives === 0) {
+                        this.gameOver(this.scorekeeper.score);
+                    }
                 }
                 increaseObjectSpeeds(multiplier) {
                     this.velocityMultiplier = multiplier;
@@ -540,15 +571,21 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
                     }
                 }
                 pauseAndResume(action) {
-                    if (action === 'pause') {
-                        clearInterval(this.interval);
-                        // this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
-                    }
-                    else if (action === 'resume') {
-                        this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+                    if (GameService.GAME_STATE !== 'gameOver') {
+                        if (action === 'pause') {
+                            GameService.GAME_STATE = 'paused';
+                            clearInterval(this.interval);
+                            // this.ctx.clearRect(0, 0, GameService.WIDTH, GameService.HEIGHT);
+                        }
+                        else if (action === 'resume') {
+                            GameService.GAME_STATE = 'started';
+                            this.interval = setInterval(() => this.refreshScreen(), 1000 / 60);
+                        }
                     }
                 }
-                gameOver() {
+                gameOver(score) {
+                    GameService.GAME_STATE = 'gameOver';
+                    this.gameOverScreen.displayGameOver(score);
                     clearInterval(this.interval);
                 }
             };
@@ -563,52 +600,52 @@ System.register("index", ["drawable-objects/FallingObject", "drawable-objects/Ba
             };
             GameService = class GameService {
                 constructor() {
-                    this.gameState = 'notStarted';
                     const gameContainer = document.querySelector('.game-container');
                     this.engine = new Engine(gameContainer);
                     this.menu = new Menu_1.default(gameContainer);
                     window.addEventListener('keydown', (e) => this.listenToKeypress(e));
                 }
                 listenToKeypress(e) {
-                    if (e.key === 'Enter' && this.gameState === 'notStarted') {
-                        this.gameState = 'started';
+                    if (e.key === 'Enter' && GameService.GAME_STATE === 'notStarted') {
+                        GameService.GAME_STATE = 'started';
                         this.menu.receiveAction('toggle');
                         this.engine.startGame();
                     }
-                    else if (e.key === 'ArrowRight' && this.gameState === 'started') {
+                    else if (e.key === 'ArrowRight' && GameService.GAME_STATE === 'started') {
                         this.engine.receiveArrowKey('right');
                     }
-                    else if (e.key === 'ArrowLeft' && this.gameState === 'started') {
+                    else if (e.key === 'ArrowLeft' && GameService.GAME_STATE === 'started') {
                         this.engine.receiveArrowKey('left');
                     }
-                    else if (e.key === 'Enter' && this.gameState === 'started') {
-                        this.gameState = 'paused';
+                    else if (e.key === 'Enter' && GameService.GAME_STATE === 'started') {
+                        GameService.GAME_STATE = 'paused';
                         this.menu.receiveAction('toggle');
                         this.engine.pauseAndResume('pause');
                     }
-                    else if (e.key === 'Enter' && this.gameState === 'paused') {
-                        this.gameState = 'started';
+                    else if (e.key === 'Enter' && GameService.GAME_STATE === 'paused') {
+                        GameService.GAME_STATE = 'started';
                         this.menu.receiveAction('toggle');
                         this.engine.pauseAndResume('resume');
                     }
-                    else if ((e.key === 'q' || e.key === 'Q') &&
-                        this.gameState === 'paused') {
-                        this.gameState = 'gameOver';
+                    else if (e.key === 'Enter' && GameService.GAME_STATE === 'gameOver') {
+                        console.log(GameService.GAME_STATE);
+                        document.location.reload();
                     }
                 }
             };
-            exports_8("default", GameService);
+            exports_9("default", GameService);
             GameService.WIDTH = 600;
             GameService.HEIGHT = 600;
             GameService.BACKGROUND_COLOUR = 'cornflowerblue';
+            GameService.GAME_STATE = 'notStarted';
             gameService = new GameService();
         }
     };
 });
-System.register("Menu", ["drawable-objects/Items"], function (exports_9, context_9) {
+System.register("Menu", ["drawable-objects/Items"], function (exports_10, context_10) {
     "use strict";
     var Items_2, Menu;
-    var __moduleName = context_9 && context_9.id;
+    var __moduleName = context_10 && context_10.id;
     return {
         setters: [
             function (Items_2_1) {
@@ -649,7 +686,7 @@ System.register("Menu", ["drawable-objects/Items"], function (exports_9, context
                     this.menu.classList.toggle('menu--hidden');
                 }
             };
-            exports_9("default", Menu);
+            exports_10("default", Menu);
         }
     };
 });

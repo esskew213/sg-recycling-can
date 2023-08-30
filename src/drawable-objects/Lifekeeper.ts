@@ -26,7 +26,7 @@ export default class Lifekeeper extends ObjectOnScreen {
     const newNumberOfLives = this.#lives + lifeBonus;
     this.#lives = Math.min(Lifekeeper.MAX_LIVES, newNumberOfLives);
     if (newNumberOfLives === 0) {
-      document.location.reload();
+      // document.location.reload();
     }
   }
   draw(ctx: CanvasRenderingContext2D): void {
